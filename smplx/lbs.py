@@ -376,6 +376,7 @@ def batch_rigid_transform(
     """
 
     joints = torch.unsqueeze(joints, dim=-1)
+    joints = joints.expand(rot_mats.size(0), -1, -1, -1)
 
     rel_joints = joints.clone()
     rel_joints[:, 1:] -= joints[:, parents[1:]]
