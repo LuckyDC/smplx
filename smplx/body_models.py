@@ -731,9 +731,11 @@ class SMPLH(SMPL):
             right_hand_pose = torch.einsum(
                 'bi,ij->bj', [right_hand_pose, self.right_hand_components])
 
-        full_pose = torch.cat([global_orient, body_pose,
-                               left_hand_pose,
-                               right_hand_pose], dim=1)
+        full_pose = [global_orient, body_pose, left_hand_pose, right_hand_pose]
+        batch_size = max([x.size(0) for x in full_pose])
+        expand_shapes = [(batch_size,) + x.shape[1:] for x in full_pose]
+        full_pose = [x.expand(s) for x, s in zip(expand_shapes, full_pose)]
+        full_pose = torch.cat(full_pose, dim=1)
         full_pose += self.pose_mean
 
         vertices, joints = lbs(betas, full_pose, self.v_template,
